@@ -82,3 +82,41 @@ app.get("/productos/categoria/:categoria", async (req, res) => {
 app.get("*", (req, res) => {
   res.send("Ruta de ejemplo");
 });
+
+const express = require('express');
+const stripe = require('stripe')('tu_clave_privada_de_stripe');
+const verifyToken = require('./middlewares/verifyToken'); // Middleware de autenticación
+
+app.use(express.json());
+
+// Rutas ya establecidas (ejemplo)
+const { getProducts, login, registerUser } = require('./requests');
+
+app.post('/api/login', login);
+app.get('/api/products', verifyToken, getProducts);
+
+// Ruta para crear el Intento de Pago con Stripe
+app.post('/api/create-payment-intent', verifyToken, async (req, res) => {
+  const { amount } = req.body;
+  
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd',
+    });
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ruta para gestionar pedidos
+app.post('/api/orders', verifyToken, (req, res) => {
+  const { cart, userDetails } = req.body;
+  // Lógica para guardar el pedido en la base de datos
+  res.status(201).send("Pedido creado con éxito");
+});
+
+app.listen(3000, () => {
+  console.log('Servidor corriendo en el puerto 3000');
+});
