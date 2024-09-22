@@ -10,7 +10,7 @@ const verifyToken = (req, res, next) => {
 
 
   const token = authHeader.split(" ")[1];
-  console.log("Token recibido:", token);  
+
   
   if (!token) {
     return res.status(401).json({ message: "No autorizado, se requiere token" });

@@ -6,6 +6,7 @@ const {
   getProductsCount,
   login,
   getProductsByCategory,
+  getCategories
 } = require("./requests");
 const verifyToken = require("./middlewares/verifyToken");
 const app = express();
@@ -66,11 +67,24 @@ app.get("/productos", verifyToken, async (req, res) => {
   }
 });
 
+app.get("/categorias", async (req, res) => {
+  try {
+    const categorias = await getCategories();
+    res.json(categorias);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener categorías" });
+  }
+});
+
 app.get("/productos/categoria/:categoria", async (req, res) => {
   const { categoria } = req.params;
+  const { page = 1, limit = 20 } = req.query; 
+  const offset = (page - 1) * limit;
   try {
-    const productos = await getProductsByCategory(categoria);
-    res.json(productos);
+    const productos = await getProductsByCategory(categoria, limit, offset);
+    res.json({
+      data: productos,
+    totalPages: 1});
   } catch (error) {
     res
       .status(500)

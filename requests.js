@@ -100,11 +100,22 @@ const getProducts = async (limit = 20, offset = 0) => {
   }
 };
 
-const getProductsByCategory = async (categoria) => {
+const getCategories = async () => {
+  try {
+    const consulta = "SELECT DISTINCT categoria FROM productos ORDER BY categoria ASC";
+    const result = await pool.query(consulta);
+    return result.rows;
+  } catch (error) {
+    console.error("Error al obtener categorías:", error);
+    throw error;
+  }
+};
+
+const getProductsByCategory = async (categoria, limit, offset) => {
   try {
     const consulta =
-      "SELECT * FROM productos WHERE categoria = $1 ORDER BY nombre ASC";
-    const values = [categoria];
+      "SELECT * FROM productos WHERE categoria = $1 ORDER BY nombre ASC LIMIT $2 OFFSET $3";
+    const values = [categoria, limit, offset];
     const result = await pool.query(consulta, values);
 
     return result.rows;
@@ -120,4 +131,5 @@ module.exports = {
   getProductsCount,
   login,
   getProductsByCategory,
+  getCategories
 };
