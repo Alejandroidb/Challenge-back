@@ -93,19 +93,8 @@ app.get("/productos/categoria/:categoria", async (req, res) => {
   }
 });
 
-// app.get("*", (req, res) => {
-//   res.send("Ruta de ejemplo");
-// });
-
 const stripe = require("stripe")("tu_clave_privada_de_stripe");
 
-// Rutas ya establecidas (ejemplo)
-// const { getProducts, login, registerUser } = require("./requests");
-
-// app.post("/api/login", login);
-// app.get("/api/products", verifyToken, getProducts);
-
-// Ruta para crear el Intento de Pago con Stripe
 app.post("/api/create-payment-intent", verifyToken, async (req, res) => {
   const { amount } = req.body;
 
