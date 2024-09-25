@@ -6,7 +6,7 @@ const {
   getProductsCount,
   login,
   getProductsByCategory,
-  getCategories
+  getCategories,
 } = require("./requests");
 const verifyToken = require("./middlewares/verifyToken");
 const app = express();
@@ -78,13 +78,14 @@ app.get("/categorias", async (req, res) => {
 
 app.get("/productos/categoria/:categoria", async (req, res) => {
   const { categoria } = req.params;
-  const { page = 1, limit = 20 } = req.query; 
+  const { page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
   try {
     const productos = await getProductsByCategory(categoria, limit, offset);
     res.json({
       data: productos,
-    totalPages: 1});
+      totalPages: 1,
+    });
   } catch (error) {
     res
       .status(500)
@@ -92,7 +93,37 @@ app.get("/productos/categoria/:categoria", async (req, res) => {
   }
 });
 
+// app.get("*", (req, res) => {
+//   res.send("Ruta de ejemplo");
+// });
 
-app.get("*", (req, res) => {
-  res.send("Ruta de ejemplo");
+const stripe = require("stripe")("tu_clave_privada_de_stripe");
+
+// Rutas ya establecidas (ejemplo)
+// const { getProducts, login, registerUser } = require("./requests");
+
+// app.post("/api/login", login);
+// app.get("/api/products", verifyToken, getProducts);
+
+// Ruta para crear el Intento de Pago con Stripe
+app.post("/api/create-payment-intent", verifyToken, async (req, res) => {
+  const { amount } = req.body;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: "usd",
+    });
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
+// Ruta para gestionar pedidos
+app.post("/api/orders", verifyToken, (req, res) => {
+  const { cart, userDetails } = req.body;
+  // Lógica para guardar el pedido en la base de datos
+  res.status(201).send("Pedido creado con éxito");
+});
+
